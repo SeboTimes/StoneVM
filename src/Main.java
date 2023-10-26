@@ -4,15 +4,14 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         CPU cpu = new CPU();
         RAM ram = new RAM();
-        ram.Load("RAM.TXT");
-
-        System.out.println("\nRegisters:");
-        cpu.printRegisters();
-        System.out.println("\nRAM:");
-        ram.printData();
+        ROM rom = new ROM(ram);
+        rom.Load("ramdisk.stone");
 
         while (cpu.getPointerPos() < ram.getSize()) {
             cpu.Execute(ram);
         }
+
+        cpu.printData();
+        ram.printData();
     }
 }

@@ -9,7 +9,7 @@ public class CPU {
     }
 
     public void Reset() {
-        Pointer = 0x04;
+        Pointer = 0x00;
         Cache = false;
         Registers = new int[0x03];
     }
@@ -24,8 +24,8 @@ public class CPU {
         System.out.println("\nCache:\n" + Cache);
     }
 
-    public void Execute(RAM ram) {
-        switch (ram.getValue(Pointer)) {
+    public void Execute(RAM ram, ROM rom) {
+        switch (rom.getValue(Pointer)) {
             case 0x01:
                 Reset();
                 break;
@@ -33,74 +33,65 @@ public class CPU {
                 Pointer--;
                 break;
             case 0x03:
-                Pointer++;
-                Pointer = ram.getValue(Pointer);
+                Pointer = rom.getValue(Pointer + 1);
+                Pointer += 2;
                 break;
 
             case 0x11:
-                Pointer++;
-                Registers[0] = ram.getValue(Pointer);
-                Pointer++;
+                Registers[rom.getValue(Pointer + 1)] = rom.getValue(Pointer + 2);
+                Pointer += 3;
                 break;
             case 0x12:
-                Pointer++;
-                Registers[1] = ram.getValue(Pointer);
-                Pointer++;
-                break;
-            case 0x13:
-                Pointer++;
-                Registers[2] = ram.getValue(Pointer);
-                Pointer++;
-                break;
-            case 0x14:
-                Pointer++;
-                ram.setValue(ram.getValue(Pointer), ram.getValue(Pointer + 1));
-                Pointer++;
-                Pointer++;
+                ram.setValue(rom.getValue(Pointer + 1), rom.getValue(Pointer + 2));
+                Pointer += 3;
                 break;
 
             case 0x21:
-                Registers[0]++;
-                Pointer++;
+                Registers[rom.getValue(Pointer + 1)]++;
+                Pointer += 2;
                 break;
             case 0x22:
-                Registers[1]++;
-                Pointer++;
+                ram.setValue(rom.getValue(Pointer + 1), ram.getValue(rom.getValue(Pointer + 1)) + 1);
+                Pointer += 2;
                 break;
             case 0x23:
-                Registers[2]++;
-                Pointer++;
+                Registers[rom.getValue(Pointer + 1)]--;
+                Pointer += 2;
                 break;
             case 0x24:
-                Pointer++;
-                ram.setValue(Pointer++, ram.getValue(Pointer) + 1);
-                Pointer++;
+                ram.setValue(rom.getValue(Pointer + 1), ram.getValue(rom.getValue(Pointer + 1)) - 1);
+                Pointer += 2;
                 break;
 
             case 0x31:
-                Pointer++;
-                System.out.print((char)ram.getValue(Pointer));
-                Pointer++;
+                System.out.print((char)rom.getValue(Pointer + 1));
+                Pointer += 2;
+                break;
+            case 0x32:
+                System.out.print((char)Registers[rom.getValue(Pointer + 1)]);
+                Pointer += 2;
+                break;
+            case 0x33:
+                System.out.print((char)ram.getValue(rom.getValue(Pointer + 1)));
+                Pointer += 2;
                 break;
 
             case 0x41:
                 if (Cache) {
-                    Pointer++;
-                    Pointer = ram.getValue(Pointer);
+                    Pointer = rom.getValue(Pointer + 1);
                 } else {
                     Pointer++;
                 }
                 break;
             case 0x42:
                 if (!Cache) {
-                    Pointer++;
-                    Pointer = ram.getValue(Pointer);
+                    Pointer = rom.getValue(Pointer + 1);
                 } else {
                     Pointer++;
                 }
                 break;
             case 0x43:
-                Cache = (Registers[ram.getValue(Pointer + 1)] == Registers[ram.getValue(Pointer + 2)]);
+                Cache = (Registers[rom.getValue(Pointer + 1)] == Registers[rom.getValue(Pointer + 2)]);
                 Pointer += 3;
                 break;
 

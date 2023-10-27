@@ -1,14 +1,17 @@
 import java.io.FileNotFoundException;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, InterruptedException {
         CPU cpu = new CPU();
-        RAM ram = new RAM();
-        ROM rom = new ROM(ram);
-        rom.Load("ramdisk.stone");
+        RAM ram = new RAM(8);
+        ROM rom = new ROM("ramdisk.stone");
 
-        while (cpu.getPointerPos() < ram.getSize()) {
-            cpu.Execute(ram);
+        rom.printData();
+
+        while (cpu.getPointerPos() < rom.getSize()) {
+            cpu.Execute(ram, rom);
+            TimeUnit.MILLISECONDS.sleep(10);
         }
 
         cpu.printData();
